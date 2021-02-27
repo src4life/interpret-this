@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 import websocket
 import subprocess
 from dataclasses import dataclass
@@ -27,6 +28,26 @@ class ConnectionSettings:
     rtmp_input: str = "rtmp://localhost:9191/live"
     rtmp_output: str = "rtmp://localhost:8080/live"
 
+class InterpreterSink(ABC):
+    def __init__(self) -> None:
+       self.on_open = None
+       self.on_close = None
+       self.on_error = None
+       self.on_data = None
+
+    def set_cb(self, on_open, on_close, on_error, on_data) -> None:
+        self.on_open = on_open
+        self.on_close = on_close
+        self.on_error = on_error
+        self.on_data = on_data
+
+    @abstractmethod
+    def run(self):
+        pass
+
+    @abstractmethod
+    def terminate(self):
+        pass
 
 class WSBridge:
     def __init__(
