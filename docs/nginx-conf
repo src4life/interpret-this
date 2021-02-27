@@ -1,0 +1,25 @@
+rtmp {
+    server {
+        listen 1935;
+        chunk_size 4096;
+        application sourcelang {
+            live on;
+            record off;
+            push rtmp://a.rtmp.youtube.com/stream1/key1;
+
+            # what user (and environment settings) are these processes spawned as?
+            exec /conf/rtmp-translator.py localhost:1234 rtmp://localhost/sourcelang/key rtmp://localhost/english/key;
+            exec /conf/rtmp-translator.py localhost:1235 rtmp://localhost/sourcelang/key rtmp://localhost/other/key;
+        }
+        application english {
+            live on;
+            record off;
+            push rtmp://a.rtmp.youtube.com/stream2/key2;
+        }
+        application other {
+            live on;
+            record off;
+            push rtmp://a.rtmp.youtube.com/stream3/key3;
+        }
+    }
+}

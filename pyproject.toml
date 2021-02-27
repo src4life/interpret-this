@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "listen3las"
+version = "0.1.0"
+description = ""
+authors = ["Carl-Johan Waldeck <cj.waldeck@gmail.com>", "Daniel Wedlund <daniel@wedlund.eu>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+websocket-client = "^0.57.0"
+loguru = "^0.5.3"
+typer = "^0.3.2"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+
+[tool.poetry.scripts]
+lasbridge = "listen3las.cli:cli"
+lasaio = "listen3las.laslistener_aio:main"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
+
