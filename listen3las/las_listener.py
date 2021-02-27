@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-import websocket
 import subprocess
 from dataclasses import dataclass
 from loguru import logger
@@ -24,7 +23,6 @@ class EncodeSettings:
 
 @dataclass
 class ConnectionSettings:
-    translation_server: str = "ws://localhost"
     rtmp_input: str = "rtmp://localhost:9191/live"
     rtmp_output: str = "rtmp://localhost:8080/live"
 
@@ -52,8 +50,9 @@ class InterpreterSink(ABC):
 class WSBridge:
     def __init__(
         self,
+        interpreter_sink: InterpreterSink,
         connection_settings: ConnectionSettings,
-        encoder_settings: EncodeSettings = None,
+        encoder_settings: EncodeSettings = None
     ) -> None:
         self.process = None
         self.encoder_settings = encoder_settings
@@ -61,22 +60,22 @@ class WSBridge:
             self.encoder_settings = EncodeSettings()
         self.connection_settings = connection_settings
 
-        self.ws = websocket.WebSocketApp(
-            f"{self.connection_settings.translation_server}",
-            on_message=self.on_message,
+        self.interpreter_sink = interpreter_sink
+        self.interpreter_sink.set_cb(
+            on_data=self.on_data,
             on_error=self.on_error,
             on_open=self.on_open,
             on_close=self.on_close,
         )
 
-    def on_message(self, message):
-        self.process.stdin.write(message)
+    def on_data(self, data):
+        self.process.stdin.write(data)
         self.process.stdin.flush()
 
-    def on_error(self, ws, error):
+    def on_error(self, error):
         logger.error(error)
 
-    def on_open(self, ws):
+    def on_open(self):
         logger.info("Translator connection open")
 
     def on_close(self):
@@ -112,7 +111,7 @@ class WSBridge:
         )
         logger.info(" ".join(self.process.args))
 
-        logger.info("Starting websocket client")
-        self.ws.run_forever(ping_interval=5, ping_timeout=2)
+        logger.info("Starting interpreter sink")
+        self.interpreter_sink.run()
 
-        logger.info("Websocket client closed")
+        logger.info("Interpreter sink closed")
