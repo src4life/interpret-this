@@ -7,10 +7,10 @@ class LasInterpreterSink(InterpreterSink):
         self.las_host = las_host
         self.ws = websocket.WebSocketApp(
             las_host,
-            on_message = self._ws_on_message,
-            on_error = self._ws_on_error,
-            on_open = self._ws_on_open,
-            on_close = self._ws_on_close
+            on_message = lambda ws, message: self._ws_on_message(ws, message),
+            on_error = lambda ws, error: self._ws_on_error(ws, error),
+            on_open = lambda ws: self._ws_on_open(ws),
+            on_close = lambda ws: self._ws_on_close(ws)
         )
 
     def _ws_on_message(self, ws, message):
