@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 import subprocess
 from dataclasses import dataclass
 from loguru import logger
+from threading import Thread
 
 @dataclass
 class EncodeSettings:
@@ -68,6 +69,10 @@ class WSBridge:
             on_close=self.on_close,
         )
 
+    def output_logger(self, pipe, output):
+        for line in iter(pipe.readline, b''):
+            output(line.decode('utf-8'))
+
     def on_data(self, data):
         self.process.stdin.write(data)
         self.process.stdin.flush()
@@ -109,9 +114,14 @@ class WSBridge:
         self.process = subprocess.Popen(
             args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE
         )
-        logger.info(" ".join(self.process.args))
 
+        # FFmpeg logs to stderr, so listen to this but output as info.
+        ffmpeg_logger = Thread(target=self.output_logger, args=(self.process.stderr,logger.info,))
+        ffmpeg_logger.start()
+
+        logger.info(" ".join(self.process.args))
         logger.info("Starting interpreter sink")
         self.interpreter_sink.run()
 
         logger.info("Interpreter sink closed")
+        ffmpeg_logger.join()
