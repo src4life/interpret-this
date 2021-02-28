@@ -81,8 +81,8 @@ class WSBridge:
         logger.info("Interpreter sink open")
 
     def on_close(self):
-        self.process.terminate()
         logger.info("Interpreter sink closed")
+        self.process.kill()
 
     def run(self):
         args = [
@@ -123,5 +123,6 @@ class WSBridge:
 
         logger.info(" ".join(self.process.args))
         logger.info("Starting interpreter sink")
+        self.process.wait()
         self.interpreter_sink.run()
         ffmpeg_logger.join()
