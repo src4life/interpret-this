@@ -5,7 +5,7 @@ description = ""
 authors = ["Carl-Johan Waldeck <cj.waldeck@gmail.com>", "Daniel Wedlund <daniel@wedlund.eu>"]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "~3.8"
 websocket-client = "^0.57.0"
 loguru = "^0.5.3"
 typer = "^0.3.2"

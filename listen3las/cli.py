@@ -1,4 +1,4 @@
-from listen3las import ConnectionSettings, WSBridge
+from listen3las import ConnectionSettings, WSBridge, LasInterpreterSink
 from loguru import logger
 import time
 import typer
@@ -16,7 +16,6 @@ def main(
 ):
 
     conn_settings = ConnectionSettings(
-        translation_server=translation_server,
         rtmp_input=rtmp_input,
         rtmp_output=rtmp_output,
     )
@@ -24,7 +23,8 @@ def main(
     logger.info(conn_settings)
 
     while True:
-        wsbridge = WSBridge(connection_settings=conn_settings)
+        las_sink = LasInterpreterSink(translation_server)
+        wsbridge = WSBridge(interpreter_sink=las_sink, connection_settings=conn_settings)
         wsbridge.run()
         if not auto_restart:
             break
